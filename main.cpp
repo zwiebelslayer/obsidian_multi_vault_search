@@ -3,9 +3,13 @@
 #include <filesystem>
 #include <vector>
 #include <string>
+#include <regex>
 
 namespace fs = std::filesystem;
-std::string directory_path = "C:\\Users\\Pascal\\Nextcloud\\ObsidianVaults";
+std::string directory_path = "H:\\HetzerNextCloud\\ObsidianVaults";
+std::regex regex_pattern("#[\\w]+");
+
+
 
 void findMarkdownFiles(const fs::path& directory_path, std::vector<fs::path>& markdown_files) {
     try {
@@ -25,7 +29,7 @@ void findMarkdownFiles(const fs::path& directory_path, std::vector<fs::path>& ma
 }
 
 // Function to search for lines containing "#Sometext" in a Markdown file
-void searchForTextInMarkdown(const fs::path& markdown_file, const std::string& search_text) {
+void searchForTextInMarkdown(const fs::path& markdown_file) {
     try {
         std::ifstream file(markdown_file);
         if (file.is_open()) {
@@ -35,8 +39,11 @@ void searchForTextInMarkdown(const fs::path& markdown_file, const std::string& s
             while (std::getline(file, line)) {
                 line_number++;
 
+
+                std::regex pattern(regex_pattern);
+                std::smatch match;
                 // Check if the line contains the search text
-                if (line.find(search_text) != std::string::npos) {
+                if (std::regex_search(line, match, pattern)) {
                     std::cout << "Found in file: " << markdown_file << " (line " << line_number << "):\n" << line << std::endl;
                 }
             }
@@ -61,9 +68,8 @@ int main() {
             findMarkdownFiles(directory_path, markdown_files);
 
             // Search for the specified text in each Markdown file
-            std::string search_text = "#todo";
             for (const auto& markdown_file : markdown_files) {
-                searchForTextInMarkdown(markdown_file, search_text);
+                searchForTextInMarkdown(markdown_file);
             }
         } else {
             std::cerr << "Provided path is not a directory." << std::endl;
