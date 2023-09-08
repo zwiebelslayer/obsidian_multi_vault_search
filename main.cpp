@@ -5,7 +5,7 @@
 #include <string>
 #include <regex>
 #include <Windows.h>
-
+#include "imgui.h"
 
 namespace fs = std::filesystem;
 std::string directory_path = "H:\\HetzerNextCloud\\ObsidianVaults";
@@ -59,7 +59,7 @@ void searchForTextInMarkdown(const fs::path& markdown_file) {
     }
 }
 
-int main() {
+int not_main() {
     // WINDOWS UTF-8 Charset workaround :(
     // see: https://stackoverflow.com/questions/45575863/how-to-print-utf-8-strings-to-stdcout-on-windows
     SetConsoleOutputCP(CP_UTF8);
