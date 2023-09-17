@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 20)
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/backends
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui/misc/cpp
 )
 
 # set common source
@@ -20,6 +21,7 @@ file (GLOB PLATFORM_SRC
         ./lib/imgui/imgui_demo.cpp
         ./lib/imgui/imgui_draw.cpp
         ./lib/src/win/main.cpp
+        ./lib/imgui/misc/cpp/imgui_stdlib.cpp
         )
 
 
