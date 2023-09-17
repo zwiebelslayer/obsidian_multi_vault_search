@@ -9,7 +9,7 @@
 #include <tchar.h>
 #include <String>
 #include "imgui_stdlib.h"
-#include <iostream>
+#include "MultiVaultHandler.h"
 
 // Data
 static LPDIRECT3D9              g_pD3D = NULL;
@@ -81,7 +81,7 @@ int main(int, char**)
     bool show_demo_window = true;
     bool show_another_window = false;
     std::string user_search_text = {""};
-
+    auto obsidian_handler = new MultiVaultHandler{};
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -121,8 +121,10 @@ int main(int, char**)
 
             ImGui::InputText("Search Term", &user_search_text);
 
-            //if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+            if (ImGui::Button("Button")){                            // Buttons return true when clicked (most widgets return true when edited/activated)
+                obsidian_handler->search("Test");
 
+            }
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
         }
@@ -156,6 +158,11 @@ int main(int, char**)
     CleanupDeviceD3D();
     ::DestroyWindow(hwnd);
     ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+
+    // cleanup my stuff
+    delete obsidian_handler;
+
+
 
     return 0;
 }

@@ -5,11 +5,11 @@
 #include <string>
 #include <regex>
 #include <Windows.h>
-#include "imgui.h"
+
 
 namespace fs = std::filesystem;
-std::string directory_path = "H:\\HetzerNextCloud\\ObsidianVaults";
-std::regex regex_pattern("#[\\w]+");
+std::string directory_path_to_test = "";
+std::regex regex_pattern_to_test("#[\\w]+"); // everything beginning with a hashtag
 
 
 
@@ -42,7 +42,7 @@ void searchForTextInMarkdown(const fs::path& markdown_file) {
                 line_number++;
 
 
-                std::regex pattern(regex_pattern);
+                std::regex pattern(regex_pattern_to_test);
                 std::smatch match;
                 // Check if the line contains the search text
                 if (std::regex_search(line, match, pattern)) {
@@ -71,9 +71,9 @@ int not_main() {
 
     try {
         // Check if the provided path exists and is a directory
-        if (fs::is_directory(directory_path)) {
+        if (fs::is_directory(directory_path_to_test)) {
             // Find Markdown files recursively within the directory
-            findMarkdownFiles(directory_path, markdown_files);
+            findMarkdownFiles(directory_path_to_test, markdown_files);
 
             // Search for the specified text in each Markdown file
             for (const auto& markdown_file : markdown_files) {
