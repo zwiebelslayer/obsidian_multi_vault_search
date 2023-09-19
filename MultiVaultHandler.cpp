@@ -6,6 +6,9 @@
 #include <regex>
 #include <Windows.h>
 #include "MultiVaultHandler.h"
+#include <nfd.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 
 
@@ -100,4 +103,25 @@ std::vector<obsidian_result*> MultiVaultHandler::searchForTextInMarkdown(const f
 
     return return_vector;
 
+}
+
+bool MultiVaultHandler::addFolderPath() {
+
+        char *folder_path = nullptr;
+        nfdresult_t result = NFD_PickFolder(nullptr, &folder_path);
+        if ( result == NFD_OKAY ) {
+            puts("Success!");
+            puts(folder_path);
+            fs::path new_path = folder_path;
+            this->obsidian_vaults_path.push_back(new_path);
+            free(folder_path);
+        }
+        else if ( result == NFD_CANCEL ) {
+            puts("User pressed cancel.");
+        }
+        else {
+            printf("Error: %s\n", NFD_GetError() );
+        }
+
+    return false;
 }

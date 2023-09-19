@@ -33,5 +33,5 @@ file (GLOB PLATFORM_SRC
 
 
 
-add_executable(obsidian_multi_vault_search MultiVaultSearch.cpp MultiVaultHandler.cpp MultiVaultHandler.h imgui_main.cpp FileDialog.cpp ${SRC} ${PLATFORM_SRC})
+add_executable(obsidian_multi_vault_search MultiVaultSearch.cpp MultiVaultHandler.cpp ImGuiWrapper.cpp ImGuiWrapper.h main.cpp MultiVaultHandler.h imgui_main.cpp ${SRC} ${PLATFORM_SRC})
 target_link_libraries(${PROJECT_NAME}  d3d9.lib comctl32.lib)

@@ -10,34 +10,35 @@
 #include <String>
 #include "imgui_stdlib.h"
 #include "MultiVaultHandler.h"
-#include "FileDialog.h"
+
 
 // Data
-static LPDIRECT3D9              g_pD3D = NULL;
-static LPDIRECT3DDEVICE9        g_pd3dDevice = NULL;
-static D3DPRESENT_PARAMETERS    g_d3dpp = {};
+static LPDIRECT3D9 g_pD3D = NULL;
+static LPDIRECT3DDEVICE9 g_pd3dDevice = NULL;
+static D3DPRESENT_PARAMETERS g_d3dpp = {};
 
 // Forward declarations of helper functions
 bool CreateDeviceD3D(HWND hWnd);
+
 void CleanupDeviceD3D();
+
 void ResetDevice();
+
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
-
-
 // Main code
-int main(int, char**)
-{
+int not_main(int, char **) {
     // Create application window
     //ImGui_ImplWin32_EnableDpiAwareness();
-    WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL };
+    WNDCLASSEXW wc = {sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL,
+                      L"ImGui Example", NULL};
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui DirectX9 Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui DirectX9 Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280,
+                                800, NULL, NULL, wc.hInstance, NULL);
 
     // Initialize Direct3D
-    if (!CreateDeviceD3D(hwnd))
-    {
+    if (!CreateDeviceD3D(hwnd)) {
         CleanupDeviceD3D();
         ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
         return 1;
@@ -50,7 +51,8 @@ int main(int, char**)
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO &io = ImGui::GetIO();
+    (void) io;
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
@@ -88,13 +90,11 @@ int main(int, char**)
 
     // Main loop
     bool done = false;
-    while (!done)
-    {
+    while (!done) {
         // Poll and handle messages (inputs, window resize, etc.)
         // See the WndProc() function below for our to dispatch events to the Win32 backend.
         MSG msg;
-        while (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
-        {
+        while (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE)) {
             ::TranslateMessage(&msg);
             ::DispatchMessage(&msg);
             if (msg.message == WM_QUIT)
@@ -108,31 +108,25 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-
-
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-        {
-            static float f = 0.0f;
-            static int counter = 0;
-
-            ImGui::Begin("Obsidian MultiVault Search");                          // Create a window called "Hello, world!" and append into it.
+        ImGui::SetNextWindowSize(ImVec2(200, 800));
+        ImGui::Begin("Obsidian MultiVault Search", NULL, ImGuiWindowFlags_NoCollapse |
+                                                         ImGuiWindowFlags_NoResize);                          // Create a window called "Hello, world!" and append into it.
 
 
 
+        ImGui::InputText("Search Term", &user_search_text);
 
-            ImGui::InputText("Search Term", &user_search_text);
+        if (ImGui::Button(
+                "Button")) {                            // Buttons return true when clicked (most widgets return true when edited/activated)
+            obsidian_handler->search("Test");
 
-            if (ImGui::Button("Button")){                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                obsidian_handler->search("Test");
-
-            }
-            if (ImGui::Button("Set Path")){
-                test_file_dialog();
-            }
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
         }
-
+        if (ImGui::Button("Set Path", ImVec2(50, 50))) {
+            obsidian_handler->addFolderPath();
+        }
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
+                    ImGui::GetIO().Framerate);
+        ImGui::End();
 
 
         // Rendering
@@ -140,10 +134,12 @@ int main(int, char**)
         g_pd3dDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
         g_pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
         g_pd3dDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
-        D3DCOLOR clear_col_dx = D3DCOLOR_RGBA((int)(clear_color.x*clear_color.w*255.0f), (int)(clear_color.y*clear_color.w*255.0f), (int)(clear_color.z*clear_color.w*255.0f), (int)(clear_color.w*255.0f));
+        D3DCOLOR clear_col_dx = D3DCOLOR_RGBA((int) (clear_color.x * clear_color.w * 255.0f),
+                                              (int) (clear_color.y * clear_color.w * 255.0f),
+                                              (int) (clear_color.z * clear_color.w * 255.0f),
+                                              (int) (clear_color.w * 255.0f));
         g_pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, clear_col_dx, 1.0f, 0);
-        if (g_pd3dDevice->BeginScene() >= 0)
-        {
+        if (g_pd3dDevice->BeginScene() >= 0) {
             ImGui::Render();
             ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
             g_pd3dDevice->EndScene();
@@ -167,14 +163,12 @@ int main(int, char**)
     delete obsidian_handler;
 
 
-
     return 0;
 }
 
 // Helper functions
 
-bool CreateDeviceD3D(HWND hWnd)
-{
+bool CreateDeviceD3D(HWND hWnd) {
     if ((g_pD3D = Direct3DCreate9(D3D_SDK_VERSION)) == NULL)
         return false;
 
@@ -187,20 +181,25 @@ bool CreateDeviceD3D(HWND hWnd)
     g_d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
     g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;           // Present with vsync
     //g_d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   // Present without vsync, maximum unthrottled framerate
-    if (g_pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &g_d3dpp, &g_pd3dDevice) < 0)
+    if (g_pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &g_d3dpp,
+                             &g_pd3dDevice) < 0)
         return false;
 
     return true;
 }
 
-void CleanupDeviceD3D()
-{
-    if (g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = NULL; }
-    if (g_pD3D) { g_pD3D->Release(); g_pD3D = NULL; }
+void CleanupDeviceD3D() {
+    if (g_pd3dDevice) {
+        g_pd3dDevice->Release();
+        g_pd3dDevice = NULL;
+    }
+    if (g_pD3D) {
+        g_pD3D->Release();
+        g_pD3D = NULL;
+    }
 }
 
-void ResetDevice()
-{
+void ResetDevice() {
     ImGui_ImplDX9_InvalidateDeviceObjects();
     HRESULT hr = g_pd3dDevice->Reset(&g_d3dpp);
     if (hr == D3DERR_INVALIDCALL)
@@ -216,16 +215,13 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
 // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
 // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
+LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
         return true;
 
-    switch (msg)
-    {
+    switch (msg) {
         case WM_SIZE:
-            if (g_pd3dDevice != NULL && wParam != SIZE_MINIMIZED)
-            {
+            if (g_pd3dDevice != NULL && wParam != SIZE_MINIMIZED) {
                 g_d3dpp.BackBufferWidth = LOWORD(lParam);
                 g_d3dpp.BackBufferHeight = HIWORD(lParam);
                 ResetDevice();
