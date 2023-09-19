@@ -10,6 +10,7 @@
 #include <String>
 #include "imgui_stdlib.h"
 #include "MultiVaultHandler.h"
+#include "FileDialog.h"
 
 // Data
 static LPDIRECT3D9              g_pD3D = NULL;
@@ -124,6 +125,9 @@ int main(int, char**)
             if (ImGui::Button("Button")){                            // Buttons return true when clicked (most widgets return true when edited/activated)
                 obsidian_handler->search("Test");
 
+            }
+            if (ImGui::Button("Set Path")){
+                test_file_dialog();
             }
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();

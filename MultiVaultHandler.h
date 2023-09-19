@@ -1,3 +1,6 @@
+#ifndef OBSIDIAN_MULTI_VAULT_SEARCH_MULTIVAULTHANDLER_H
+#define OBSIDIAN_MULTI_VAULT_SEARCH_MULTIVAULTHANDLER_H
+
 #include <iostream>
 #include <unordered_map>
 #include "string"
@@ -8,8 +11,7 @@
 #include <regex>
 #include "secret.h"
 
-#ifndef OBSIDIAN_MULTI_VAULT_SEARCH_MULTIVAULTHANDLER_H
-#define OBSIDIAN_MULTI_VAULT_SEARCH_MULTIVAULTHANDLER_H
+
 
 
 struct obsidian_result {
