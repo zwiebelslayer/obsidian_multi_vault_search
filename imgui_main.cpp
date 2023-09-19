@@ -118,7 +118,7 @@ int not_main(int, char **) {
 
         if (ImGui::Button(
                 "Button")) {                            // Buttons return true when clicked (most widgets return true when edited/activated)
-            obsidian_handler->search("Test");
+
 
         }
         if (ImGui::Button("Set Path", ImVec2(50, 50))) {

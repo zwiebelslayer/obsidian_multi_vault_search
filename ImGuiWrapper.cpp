@@ -37,12 +37,22 @@ void render_dear_imgui_with_obsidian(MultiVaultHandler* obsidian_handle){
     ImGui::InputText("Search Term", &user_search_text);
 
     if (ImGui::Button("Button")) {
-        obsidian_handle->search("Test");
-
+        //obsidian_handle->search("Test");
     }
     if (ImGui::Button("Set Path", ImVec2(50, 50))) {
         obsidian_handle->addFolderPath();
     }
+
+    for(const auto& result : obsidian_handle->getResults()){
+        auto multiple_results = result.second;
+        for( const auto& single_entry : multiple_results){
+            ImGui::Text(single_entry->hashtag.c_str());
+            ImGui::Text(single_entry->path.c_str());
+        }
+
+    }
+
+
     //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
     //ImGui::GetIO().Framerate);
     ImGui::End();

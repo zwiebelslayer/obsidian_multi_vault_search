@@ -20,6 +20,7 @@ struct obsidian_result {
     std::string hashtag;
     std::string line;
 } ;
+const uint16_t MAX_DEPTH = 100;
 
 
 //----------------------------------------------------------------
@@ -29,11 +30,15 @@ namespace fs = std::filesystem;
 class MultiVaultHandler {
 public:
     MultiVaultHandler();
+    ~MultiVaultHandler();
 
-    bool search(std::string search_string);
-    void findMarkdownFiles(const fs::path& directory_path); // find all markdownfiles
+    bool createHashmapWithHashtags();
+    void findMarkdownFiles(const fs::path& directory_path, uint16_t depth); // find all markdownfiles
     std::vector<obsidian_result*> searchForTextInMarkdown(const fs::path& markdown_file); // search for the hashtags in the markdownfiles
     bool addFolderPath();
+
+    std::unordered_map<std::string, std::vector<obsidian_result*> > getResults();
+
 private:
 
     fs::path temp_dir_hardcoded_path = hardcoded_path;

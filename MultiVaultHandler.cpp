@@ -11,31 +11,93 @@
 #include <stdlib.h>
 
 
+const std::string vault_file_name = "vault_paths.txt";
 
 MultiVaultHandler::MultiVaultHandler() {
-    // constructor empty for now
-}
+    // read file of existing vault paths
+    std::ifstream vault_file(vault_file_name);
 
-bool MultiVaultHandler::search(std::string search_string){
-
-    this->findMarkdownFiles(temp_dir_hardcoded_path);
-    for (const auto& file: this->markdown_files){
-        std::vector<obsidian_result*> results_vector = this->searchForTextInMarkdown(file);
-        for(const auto& result : results_vector){
-            results_hash_map[result->hashtag].emplace_back(result);
+    if (!vault_file || vault_file.bad() || vault_file.fail()) {
+        std::cout << "Failed to read existing paths" << std::endl;
+    } else if (vault_file.good()) {
+        for (std::string line; getline(vault_file, line);) {
+            std::cout << line << std::endl;
+            try {
+                this->obsidian_vaults_path.emplace_back(fs::path(line.c_str()));
+            }
+            catch (std::filesystem::filesystem_error const &ex) {
+                std::cout << "caught an error with file " << line << ex.what() << std::endl;
+            }
         }
-
-
     }
 
-    std::cout << "found the following in the files" << std::endl;
-    for (const auto& pair : this->results_hash_map) {
-        const std::string& key = pair.first;
-        const std::vector<obsidian_result*>& values = pair.second;
+    for (const auto &path: obsidian_vaults_path) {
+        std::cout << path << std::endl;
+    }
+
+    // create the hashmap
+    this->createHashmapWithHashtags();
+
+}
+
+MultiVaultHandler::~MultiVaultHandler() {
+    std::cout << "saving paths" << std::endl;
+    for (const auto &path: obsidian_vaults_path) {
+        std::cout << "path " << path << std::endl;
+    }
+
+    std::fstream vault_paths;
+    vault_paths.open(vault_file_name, std::ios::out);
+    if (!vault_paths) {
+        std::cout << "Error saving vault paths";
+    } else {
+        for (const auto &path: obsidian_vaults_path) {
+            vault_paths << path.string() << std::endl;
+        }
+
+        vault_paths.close();
+    }
+
+    // Free memory
+    obsidian_vaults_path.clear();
+    markdown_files.clear();
+    results_hash_map.clear();
+
+}
+
+
+bool MultiVaultHandler::createHashmapWithHashtags() {
+
+
+    auto iterator = this->obsidian_vaults_path.begin();
+    while (iterator != this->obsidian_vaults_path.end()) {
+
+        if (!std::filesystem::is_directory(*iterator)) {
+            std::cout << "deleting vault path is not valid " << *iterator << std::endl;
+            iterator = this->obsidian_vaults_path.erase(
+                    iterator); // delete this entry NOTE: this seems to be a slow operation since vector is shifted everytime
+            continue;
+        }
+
+        this->findMarkdownFiles(*iterator, 0);
+        iterator++;
+    }
+
+    for (const auto &file: this->markdown_files) {
+        std::vector<obsidian_result *> results_vector = this->searchForTextInMarkdown(file);
+        for (const auto &result: results_vector) {
+            results_hash_map[result->hashtag].emplace_back(result);
+        }
+    }
+
+    for (const auto &pair: this->results_hash_map) {
+        const std::string &key = pair.first;
+        const std::vector<obsidian_result *> &values = pair.second;
 
         std::cout << "Key: " << key << std::endl;
-        for (const auto& item : values) {
-            std::cout << "  Path: " << item->path << ", Line Number: " << item->line_number <<"Hashtag: "<< item->hashtag << std::endl;
+        for (const auto &item: values) {
+            std::cout << "  Path: " << item->path << ", Line Number: " << item->line_number << "Hashtag: "
+                      << item->hashtag << std::endl;
         }
     }
 
@@ -44,26 +106,31 @@ bool MultiVaultHandler::search(std::string search_string){
 }
 
 
+void MultiVaultHandler::findMarkdownFiles(const fs::path &directory_path, uint16_t depth) {
+    if (depth > MAX_DEPTH) {
+        std::cout << "max depth reached " << std::endl;
+        return;
+    }
 
-void MultiVaultHandler::findMarkdownFiles(const fs::path &directory_path) {
     try {
         // Iterate over the directory
-        for (const auto& entry : fs::directory_iterator(directory_path)) {
+        for (const auto &entry: fs::directory_iterator(directory_path)) {
             if (fs::is_directory(entry)) {
                 // If the entry is a subdirectory, recursively search it
-                this->findMarkdownFiles(entry);
+                this->findMarkdownFiles(entry, depth++);
             } else if (entry.path().extension() == ".md") {
                 // If the entry is a Markdown file, add its path to the vector
                 this->markdown_files.push_back(entry.path());
             }
         }
-    } catch (const fs::filesystem_error& ex) {
+    } catch (const fs::filesystem_error &ex) {
         std::cerr << "Error: " << ex.what() << std::endl;
+
     }
 }
 
-std::vector<obsidian_result*> MultiVaultHandler::searchForTextInMarkdown(const fs::path& markdown_file) {
-       auto return_vector = std::vector<obsidian_result*>{};
+std::vector<obsidian_result *> MultiVaultHandler::searchForTextInMarkdown(const fs::path &markdown_file) {
+    auto return_vector = std::vector<obsidian_result *>{};
 
     try {
         std::ifstream file(markdown_file);
@@ -97,7 +164,7 @@ std::vector<obsidian_result*> MultiVaultHandler::searchForTextInMarkdown(const f
         } else {
             std::cerr << "Unable to open file: " << markdown_file << std::endl;
         }
-    } catch (const std::exception& ex) {
+    } catch (const std::exception &ex) {
         std::cerr << "Error: " << ex.what() << std::endl;
     }
 
@@ -107,21 +174,23 @@ std::vector<obsidian_result*> MultiVaultHandler::searchForTextInMarkdown(const f
 
 bool MultiVaultHandler::addFolderPath() {
 
-        char *folder_path = nullptr;
-        nfdresult_t result = NFD_PickFolder(nullptr, &folder_path);
-        if ( result == NFD_OKAY ) {
-            puts("Success!");
-            puts(folder_path);
-            fs::path new_path = folder_path;
-            this->obsidian_vaults_path.push_back(new_path);
-            free(folder_path);
-        }
-        else if ( result == NFD_CANCEL ) {
-            puts("User pressed cancel.");
-        }
-        else {
-            printf("Error: %s\n", NFD_GetError() );
-        }
+    char *folder_path = nullptr;
+    nfdresult_t result = NFD_PickFolder(nullptr, &folder_path);
+    if (result == NFD_OKAY) {
+        puts("Success!");
+        puts(folder_path);
+        fs::path new_path = folder_path;
+        this->obsidian_vaults_path.push_back(new_path);
+        free(folder_path);
+    } else if (result == NFD_CANCEL) {
+        puts("User pressed cancel.");
+    } else {
+        printf("Error: %s\n", NFD_GetError());
+    }
 
     return false;
+}
+
+std::unordered_map<std::string, std::vector<obsidian_result *> > MultiVaultHandler::getResults() {
+    return this->results_hash_map;
 }
