@@ -202,3 +202,23 @@ std::unordered_map<std::string, std::vector<obsidian_result *> > MultiVaultHandl
 std::vector<std::filesystem::path> MultiVaultHandler::getVaultPaths() {
     return this->obsidian_vaults_path;
 }
+
+std::vector<obsidian_result> MultiVaultHandler::searchForHashtags(const std::string &search){
+    std::string search_string_w_hashtag = "#" + search;
+    auto searchResult = this->results_hash_map.find(search_string_w_hashtag);
+    std::vector<obsidian_result> return_results = {};
+
+    if(searchResult == results_hash_map.end())
+    {
+        std::cout << "could not find the given key in the files " << std::endl;
+        return return_results;
+    }
+
+
+    for(auto vector_iter : searchResult->second){
+        obsidian_result res = obsidian_result{vector_iter->path, vector_iter->line_number, vector_iter->hashtag, vector_iter->line};
+        return_results.push_back(res);
+    }
+
+    return return_results;
+}
