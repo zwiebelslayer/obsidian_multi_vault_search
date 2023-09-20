@@ -9,7 +9,6 @@
 #include <fstream>
 #include <filesystem>
 #include <regex>
-#include "secret.h"
 
 
 
@@ -41,7 +40,7 @@ public:
 
 private:
 
-    fs::path temp_dir_hardcoded_path = hardcoded_path;
+    //fs::path temp_dir_hardcoded_path = hardcoded_path;
     std::vector<fs::path> obsidian_vaults_path = {};
     //std::regex regex_pattern("#[\\w]+"); // everything beginning with a hashtag
     std::unordered_map<std::string, std::vector<obsidian_result*> > results_hash_map = {};

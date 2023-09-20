@@ -65,7 +65,7 @@ int create_dear_imgui(){
     wc = {sizeof(wc), CS_CLASSDC, WndProc_, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL,
                       L"Obsidian Multi Vault Search", NULL};
     ::RegisterClassExW(&wc);
-    hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui DirectX9 Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280,
+    hwnd = ::CreateWindowW(wc.lpszClassName, L"Obsidian Multi Vault Search", WS_OVERLAPPEDWINDOW, 100, 100, 1280,
                                 800, NULL, NULL, wc.hInstance, NULL);
 
     // Initialize Direct3D
