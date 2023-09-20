@@ -38,6 +38,8 @@ public:
 
     std::unordered_map<std::string, std::vector<obsidian_result*> > getResults();
     std::vector<std::filesystem::path> getVaultPaths();
+
+    std::vector<obsidian_result> searchForHashtags(const std::string& search_string);
 private:
 
     //fs::path temp_dir_hardcoded_path = hardcoded_path;

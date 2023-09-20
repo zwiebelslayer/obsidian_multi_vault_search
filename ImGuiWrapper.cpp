@@ -37,7 +37,7 @@ void render_dear_imgui_with_obsidian(MultiVaultHandler* obsidian_handle){
     ImGui::InputText("Search Term", &user_search_text);
 
     if (ImGui::Button("Button")) {
-        //obsidian_handle->search("Test");
+        obsidian_handle->searchForHashtags(user_search_text);
     }
     if (ImGui::Button("Set Path", ImVec2(50, 50))) {
         obsidian_handle->addFolderPath();
@@ -94,6 +94,7 @@ int create_dear_imgui(){
     ImGui::CreateContext();
     io = ImGui::GetIO();
     (void) io;
+    io.ConfigWindowsMoveFromTitleBarOnly = true;
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
