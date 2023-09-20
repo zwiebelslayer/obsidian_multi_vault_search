@@ -37,7 +37,7 @@ public:
     bool addFolderPath();
 
     std::unordered_map<std::string, std::vector<obsidian_result*> > getResults();
-
+    std::vector<std::filesystem::path> getVaultPaths();
 private:
 
     //fs::path temp_dir_hardcoded_path = hardcoded_path;

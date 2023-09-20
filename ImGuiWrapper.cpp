@@ -51,7 +51,16 @@ void render_dear_imgui_with_obsidian(MultiVaultHandler* obsidian_handle){
         }
 
     }
+    ImGui::End();
+    ImGui::SetNextWindowSize(ImVec2(500, 500));
+    ImGui::Begin("Vault Paths", NULL, ImGuiWindowFlags_NoCollapse |
+                                                     ImGuiWindowFlags_NoResize);
 
+    for(auto const& path : obsidian_handle->getVaultPaths()){
+        std::string string_path = path.string();
+        const char* text_poiter = string_path.c_str();
+        ImGui::Text(text_poiter);
+    }
 
     //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
     //ImGui::GetIO().Framerate);
@@ -65,8 +74,8 @@ int create_dear_imgui(){
     wc = {sizeof(wc), CS_CLASSDC, WndProc_, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL,
                       L"Obsidian Multi Vault Search", NULL};
     ::RegisterClassExW(&wc);
-    hwnd = ::CreateWindowW(wc.lpszClassName, L"Obsidian Multi Vault Search", WS_OVERLAPPEDWINDOW, 100, 100, 1280,
-                                800, NULL, NULL, wc.hInstance, NULL);
+    hwnd = ::CreateWindowW(wc.lpszClassName, L"Obsidian Multi Vault Search", WS_OVERLAPPEDWINDOW, 100, 100, 800,
+                                600, NULL, NULL, wc.hInstance, NULL);
 
     // Initialize Direct3D
     if (!CreateDeviceD3D_(hwnd)) {
@@ -95,6 +104,9 @@ int create_dear_imgui(){
     // Setup Platform/Renderer backends
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX9_Init(g_pd3dDevice);
+
+    // TODO change window size
+
     return 0;
 }
 

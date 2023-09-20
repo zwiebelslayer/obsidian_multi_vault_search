@@ -180,7 +180,12 @@ bool MultiVaultHandler::addFolderPath() {
         puts("Success!");
         puts(folder_path);
         fs::path new_path = folder_path;
+        //
         this->obsidian_vaults_path.push_back(new_path);
+        // remove duplicates
+        std::sort(obsidian_vaults_path.begin(), obsidian_vaults_path.end());
+        obsidian_vaults_path.erase(std::unique(obsidian_vaults_path.begin(), obsidian_vaults_path.end()), obsidian_vaults_path.end());
+        //vec.erase( unique( vec.begin(), vec.end() ), vec.end() );
         free(folder_path);
     } else if (result == NFD_CANCEL) {
         puts("User pressed cancel.");
@@ -193,4 +198,7 @@ bool MultiVaultHandler::addFolderPath() {
 
 std::unordered_map<std::string, std::vector<obsidian_result *> > MultiVaultHandler::getResults() {
     return this->results_hash_map;
+}
+std::vector<std::filesystem::path> MultiVaultHandler::getVaultPaths() {
+    return this->obsidian_vaults_path;
 }
