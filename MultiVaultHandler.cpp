@@ -1,5 +1,4 @@
 #include <iostream>
-#include <fstream>
 #include <filesystem>
 #include <vector>
 #include <string>
@@ -192,7 +191,7 @@ bool MultiVaultHandler::addFolderPath() {
     } else {
         printf("Error: %s\n", NFD_GetError());
     }
-
+    this->createHashmapWithHashtags();
     return false;
 }
 
@@ -217,6 +216,7 @@ std::vector<obsidian_result> MultiVaultHandler::searchForHashtags(const std::str
 
     for(auto vector_iter : searchResult->second){
         obsidian_result res = obsidian_result{vector_iter->path, vector_iter->line_number, vector_iter->hashtag, vector_iter->line};
+        std::cout << "Found in file " << vector_iter->path << std::endl;
         return_results.push_back(res);
     }
 

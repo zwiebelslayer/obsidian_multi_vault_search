@@ -8,6 +8,10 @@
 #include "MultiVaultHandler.h"
 #include <iostream>
 #include "MultiVaultHandler.h"
+#include <shlobj.h>
+#include <shlwapi.h>
+#include <objbase.h>
+
 
 static LPDIRECT3D9 g_pD3D = NULL;
 static LPDIRECT3DDEVICE9 g_pd3dDevice = NULL;
@@ -20,7 +24,10 @@ void CleanupDeviceD3D_();
 
 void ResetDevice_();
 
-std::string user_search_text = {""};
+//GLOBAL VARIABLES
+std::string user_search_text;
+std::vector<obsidian_result> searchResults = {};
+
 
 LRESULT WINAPI WndProc_(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -29,53 +36,76 @@ HWND hwnd;
 ImGuiIO io;
 
 
-void render_dear_imgui_with_obsidian(MultiVaultHandler* obsidian_handle){
+void render_dear_imgui_with_obsidian(MultiVaultHandler *obsidian_handle) {
     // this links the dear imgui window with the obsidian instance (logic)
     ImGui::SetNextWindowSize(ImVec2(500, 500));
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::Begin("Obsidian MultiVault Search", NULL, ImGuiWindowFlags_NoCollapse |
-                                                     ImGuiWindowFlags_NoResize);
+                                                     ImGuiWindowFlags_NoResize | ImGuiCond_FirstUseEver);
     ImGui::InputText("Search Term", &user_search_text);
     // TODO: this needs a way better interface, e.g memory leaks
     if (ImGui::Button("Search")) {
-        auto searchResults = obsidian_handle->searchForHashtags(user_search_text); // problem this result might go out of scope
+        searchResults = obsidian_handle->searchForHashtags(
+                user_search_text); // problem this result might go out of scope
     }
+
     if (ImGui::Button("Set Path", ImVec2(50, 50))) {
         obsidian_handle->addFolderPath();
     }
 
-    for(const auto& result : obsidian_handle->getResults()){
+    for (const auto &result: obsidian_handle->getResults()) {
         auto multiple_results = result.second;
-        for( const auto& single_entry : multiple_results){
+        for (const auto &single_entry: multiple_results) {
             ImGui::Text(single_entry->hashtag.c_str());
             ImGui::Text(single_entry->path.c_str());
         }
 
     }
     ImGui::End();
+    // Second window for the vault paths
+    ImGui::SetNextWindowPos(ImVec2(0, 500));
     ImGui::SetNextWindowSize(ImVec2(500, 500));
     ImGui::Begin("Vault Paths", NULL, ImGuiWindowFlags_NoCollapse |
-                                                     ImGuiWindowFlags_NoResize);
+                                      ImGuiWindowFlags_NoResize | ImGuiCond_FirstUseEver);
 
-    for(auto const& path : obsidian_handle->getVaultPaths()){
+    for (auto const &path: obsidian_handle->getVaultPaths()) {
+        // is this bad code?
         std::string string_path = path.string();
-        const char* text_poiter = string_path.c_str();
-        ImGui::Text(text_poiter);
+        const char *text_pointer = string_path.c_str();
+        ImGui::Text(text_pointer);
     }
 
     //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
     //ImGui::GetIO().Framerate);
     ImGui::End();
+
+    ImGui::SetNextWindowPos(ImVec2(500, 0));
+    ImGui::SetNextWindowSize(ImVec2(500, 500));
+    ImGui::Begin("Results", NULL, ImGuiWindowFlags_NoCollapse |
+                                  ImGuiWindowFlags_NoResize | ImGuiCond_FirstUseEver);
+
+    for (auto const &single_result: searchResults) {
+        std::string button_text = single_result.path;
+        button_text += "in line " + single_result.line_number;
+        if (ImGui::Button(button_text.c_str())) {
+            std::string command_to_open = "start " + single_result.path;
+            system(command_to_open.c_str());
+        }
+    }
+
+    ImGui::End();
+
 }
 
 
-int create_dear_imgui(){
+int create_dear_imgui() {
     // Create application window
     //ImGui_ImplWin32_EnableDpiAwareness();
     wc = {sizeof(wc), CS_CLASSDC, WndProc_, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL,
-                      L"Obsidian Multi Vault Search", NULL};
+          L"Obsidian Multi Vault Search", NULL};
     ::RegisterClassExW(&wc);
     hwnd = ::CreateWindowW(wc.lpszClassName, L"Obsidian Multi Vault Search", WS_OVERLAPPEDWINDOW, 100, 100, 800,
-                                600, NULL, NULL, wc.hInstance, NULL);
+                           600, NULL, NULL, wc.hInstance, NULL);
 
     // Initialize Direct3D
     if (!CreateDeviceD3D_(hwnd)) {
@@ -111,7 +141,7 @@ int create_dear_imgui(){
     return 0;
 }
 
-int stop_dear_imgui(){
+int stop_dear_imgui() {
     ImGui_ImplDX9_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
@@ -123,7 +153,7 @@ int stop_dear_imgui(){
     return 0;
 }
 
-void render_dear_imgui(bool *done, MultiVaultHandler* obsidian_handle){
+void render_dear_imgui(bool *done, MultiVaultHandler *obsidian_handle) {
     // function to handle rendering everything is copied from the example
     //
     // Poll and handle messages (inputs, window resize, etc.)
@@ -168,7 +198,6 @@ void render_dear_imgui(bool *done, MultiVaultHandler* obsidian_handle){
         ResetDevice_();
 
 }
-
 
 
 bool CreateDeviceD3D_(HWND hWnd) {
