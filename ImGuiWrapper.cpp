@@ -11,7 +11,10 @@
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <objbase.h>
-
+#include <cctype>
+#include <iomanip>
+#include <sstream>
+#include <string>
 
 static LPDIRECT3D9 g_pD3D = NULL;
 static LPDIRECT3DDEVICE9 g_pd3dDevice = NULL;
@@ -34,6 +37,29 @@ LRESULT WINAPI WndProc_(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 WNDCLASSEXW wc;
 HWND hwnd;
 ImGuiIO io;
+// https://stackoverflow.com/questions/154536/encode-decode-urls-in-c
+ std::string url_encode(const std::string &value) {
+    std::ostringstream escaped;
+    escaped.fill('0');
+    escaped << std::hex;
+
+    for (std::string::const_iterator i = value.begin(), n = value.end(); i != n; ++i) {
+        std::string::value_type c = (*i);
+
+        // Keep alphanumeric and other accepted characters intact
+        if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+            escaped << c;
+            continue;
+        }
+
+        // Any other characters are percent-encoded
+        escaped << std::uppercase;
+        escaped << '%' << std::setw(2) << int((unsigned char) c);
+        escaped << std::nouppercase;
+    }
+
+    return escaped.str();
+}
 
 
 void render_dear_imgui_with_obsidian(MultiVaultHandler *obsidian_handle) {
@@ -88,7 +114,9 @@ void render_dear_imgui_with_obsidian(MultiVaultHandler *obsidian_handle) {
         std::string button_text = single_result.path;
         button_text += "in line " + single_result.line_number;
         if (ImGui::Button(button_text.c_str())) {
-            std::string command_to_open = "start " + single_result.path;
+            //std::string command_to_open = "start obsidian://open?file=" + single_result.path;
+            std::string command_to_open = "%windir%\\explorer.exe /select, "+ single_result.path ;
+            std::cout << "User pressed " << command_to_open << single_result.path << std::endl;
             system(command_to_open.c_str());
         }
     }

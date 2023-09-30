@@ -184,7 +184,6 @@ bool MultiVaultHandler::addFolderPath() {
         // remove duplicates
         std::sort(obsidian_vaults_path.begin(), obsidian_vaults_path.end());
         obsidian_vaults_path.erase(std::unique(obsidian_vaults_path.begin(), obsidian_vaults_path.end()), obsidian_vaults_path.end());
-        //vec.erase( unique( vec.begin(), vec.end() ), vec.end() );
         free(folder_path);
     } else if (result == NFD_CANCEL) {
         puts("User pressed cancel.");
