@@ -41,6 +41,7 @@ public:
 
     std::vector<obsidian_result> searchForHashtags(const std::string& search_string);
 private:
+    std::vector<obsidian_result> searchForSearchTerm(const std::string &searchTerm);
 
     std::vector<fs::path> obsidian_vaults_path = {};
     std::unordered_map<std::string, std::vector<obsidian_result*> > results_hash_map = {};

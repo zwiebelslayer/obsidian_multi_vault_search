@@ -183,7 +183,8 @@ bool MultiVaultHandler::addFolderPath() {
         this->obsidian_vaults_path.push_back(new_path);
         // remove duplicates
         std::sort(obsidian_vaults_path.begin(), obsidian_vaults_path.end());
-        obsidian_vaults_path.erase(std::unique(obsidian_vaults_path.begin(), obsidian_vaults_path.end()), obsidian_vaults_path.end());
+        obsidian_vaults_path.erase(std::unique(obsidian_vaults_path.begin(), obsidian_vaults_path.end()),
+                                   obsidian_vaults_path.end());
         free(folder_path);
     } else if (result == NFD_CANCEL) {
         puts("User pressed cancel.");
@@ -197,27 +198,75 @@ bool MultiVaultHandler::addFolderPath() {
 std::unordered_map<std::string, std::vector<obsidian_result *> > MultiVaultHandler::getResults() {
     return this->results_hash_map;
 }
+
 std::vector<std::filesystem::path> MultiVaultHandler::getVaultPaths() {
     return this->obsidian_vaults_path;
 }
+std::vector<obsidian_result> MultiVaultHandler::searchForSearchTerm(const std::string &searchTerm){
+    auto return_vector = std::vector<obsidian_result>{};
+    std::cout << "searching for " << searchTerm << std::endl;
+    for(auto const& current_file : this->markdown_files){
+        try {
+            std::ifstream file(current_file);
+            if (file.is_open()) {
+                std::string line;
+                int line_number = 0;
 
-std::vector<obsidian_result> MultiVaultHandler::searchForHashtags(const std::string &search){
-    std::string search_string_w_hashtag = "#" + search;
-    auto searchResult = this->results_hash_map.find(search_string_w_hashtag);
-    std::vector<obsidian_result> return_results = {};
+                while (std::getline(file, line)) {
+                    line_number++;
+                    if (line.find(searchTerm) != std::string::npos) {
+                        std::cout << "Word found on line " << line_number << ": " << line << std::endl;
+                        auto new_obrs = obsidian_result{};
+                        new_obrs.line_number = line_number;
+                        new_obrs.path = fs::path(current_file).string();
+                        new_obrs.hashtag = searchTerm;
+                        new_obrs.line = line;
+                        return_vector.push_back(new_obrs);
+                    }
 
-    if(searchResult == results_hash_map.end())
-    {
-        std::cout << "could not find the given key in the files " << std::endl;
+                }
+
+                file.close(); // very important to close the file again
+            } else {
+                std::cerr << "Unable to open file: " << current_file << std::endl;
+            }
+        } catch (const std::exception &ex) {
+            std::cerr << "Error: " << ex.what() << std::endl;
+        }
+
+
+    }
+    return return_vector;
+}
+
+
+std::vector<obsidian_result> MultiVaultHandler::searchForHashtags(const std::string &search) {
+
+    if (search[0] == '#') {
+
+
+        //std::string search_string_w_hashtag = "#" + search;
+        auto searchResult = this->results_hash_map.find(search);
+        std::vector<obsidian_result> return_results = {};
+
+        if (searchResult == results_hash_map.end()) {
+            std::cout << "could not find the given key in the files " << std::endl;
+            return return_results;
+        }
+
+        for (auto vector_iter: searchResult->second) {
+            obsidian_result res = obsidian_result{vector_iter->path, vector_iter->line_number, vector_iter->hashtag,
+                                                  vector_iter->line};
+            std::cout << "Found in file " << vector_iter->path << std::endl;
+            return_results.push_back(res);
+        }
         return return_results;
     }
-
-
-    for(auto vector_iter : searchResult->second){
-        obsidian_result res = obsidian_result{vector_iter->path, vector_iter->line_number, vector_iter->hashtag, vector_iter->line};
-        std::cout << "Found in file " << vector_iter->path << std::endl;
-        return_results.push_back(res);
+    else{
+        // Note this is not cached
+        // is this bad code?
+        std::cout << "searching for non hashtag search term" << std::endl;
+        return this->searchForSearchTerm(search);
     }
 
-    return return_results;
 }
