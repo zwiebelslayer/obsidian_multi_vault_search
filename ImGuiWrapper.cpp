@@ -75,7 +75,7 @@ void render_dear_imgui_with_obsidian(MultiVaultHandler *obsidian_handle) {
                 user_search_text); // problem this result might go out of scope
     }
 
-    if (ImGui::Button("Set Path", ImVec2(50, 50))) {
+    if (ImGui::Button("Set Path")) {
         obsidian_handle->addFolderPath();
     }
 
@@ -98,7 +98,10 @@ void render_dear_imgui_with_obsidian(MultiVaultHandler *obsidian_handle) {
         // is this bad code?
         std::string string_path = path.string();
         const char *text_pointer = string_path.c_str();
-        ImGui::Text(text_pointer);
+
+        if(ImGui::Button(text_pointer)){
+            obsidian_handle->deletePath(path);
+        }
     }
 
     //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,

@@ -35,7 +35,7 @@ public:
     void findMarkdownFiles(const fs::path& directory_path, uint16_t depth); // find all markdownfiles
     std::vector<obsidian_result*> searchForTextInMarkdown(const fs::path& markdown_file); // search for the hashtags in the markdownfiles
     bool addFolderPath();
-
+    void deletePath(fs::path inputPath);
     std::unordered_map<std::string, std::vector<obsidian_result*> > getResults();
     std::vector<std::filesystem::path> getVaultPaths();
 
@@ -44,7 +44,8 @@ private:
     std::vector<obsidian_result> searchForSearchTerm(const std::string &searchTerm);
 
     std::vector<fs::path> obsidian_vaults_path = {};
-    std::unordered_map<std::string, std::vector<obsidian_result*> > results_hash_map = {};
+
+    std::unordered_map<std::string, std::vector<obsidian_result*> > results_hash_map = {};  // having a pointer here is not good code TODO: remove pointers
     std::vector<fs::path> markdown_files = {};
 };
 

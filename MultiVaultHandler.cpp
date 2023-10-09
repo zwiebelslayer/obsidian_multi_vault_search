@@ -180,7 +180,7 @@ bool MultiVaultHandler::addFolderPath() {
         puts(folder_path);
         fs::path new_path = folder_path;
         //
-        this->obsidian_vaults_path.push_back(new_path);
+        obsidian_vaults_path.push_back(new_path);
         // remove duplicates
         std::sort(obsidian_vaults_path.begin(), obsidian_vaults_path.end());
         obsidian_vaults_path.erase(std::unique(obsidian_vaults_path.begin(), obsidian_vaults_path.end()),
@@ -269,4 +269,13 @@ std::vector<obsidian_result> MultiVaultHandler::searchForHashtags(const std::str
         return this->searchForSearchTerm(search);
     }
 
+}
+
+void MultiVaultHandler::deletePath(fs::path inputPath) {
+    auto iterator = std::find(this->obsidian_vaults_path.begin(), this->obsidian_vaults_path.end(), inputPath);
+
+   obsidian_vaults_path.erase(iterator);
+
+    // this will leak memeory! TODO Fix this
+    results_hash_map = {};
 }
