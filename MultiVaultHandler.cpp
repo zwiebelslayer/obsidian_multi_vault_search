@@ -83,20 +83,20 @@ bool MultiVaultHandler::createHashmapWithHashtags() {
     }
 
     for (const auto &file: this->markdown_files) {
-        std::vector<obsidian_result *> results_vector = this->searchForTextInMarkdown(file);
+        std::vector<obsidian_result > results_vector = this->searchForTextInMarkdown(file);
         for (const auto &result: results_vector) {
-            results_hash_map[result->hashtag].emplace_back(result);
+            results_hash_map[result.hashtag].emplace_back(result);
         }
     }
 
     for (const auto &pair: this->results_hash_map) {
         const std::string &key = pair.first;
-        const std::vector<obsidian_result *> &values = pair.second;
+        const std::vector<obsidian_result > &values = pair.second;
 
         std::cout << "Key: " << key << std::endl;
         for (const auto &item: values) {
-            std::cout << "  Path: " << item->path << ", Line Number: " << item->line_number << "Hashtag: "
-                      << item->hashtag << std::endl;
+            std::cout << "  Path: " << item.path << ", Line Number: " << item.line_number << "Hashtag: "
+                      << item.hashtag << std::endl;
         }
     }
 
@@ -128,8 +128,8 @@ void MultiVaultHandler::findMarkdownFiles(const fs::path &directory_path, uint16
     }
 }
 
-std::vector<obsidian_result *> MultiVaultHandler::searchForTextInMarkdown(const fs::path &markdown_file) {
-    auto return_vector = std::vector<obsidian_result *>{};
+std::vector<obsidian_result > MultiVaultHandler::searchForTextInMarkdown(const fs::path &markdown_file) {
+    auto return_vector = std::vector<obsidian_result >{};
 
     try {
         std::ifstream file(markdown_file);
@@ -147,11 +147,11 @@ std::vector<obsidian_result *> MultiVaultHandler::searchForTextInMarkdown(const 
                 if (std::regex_search(line, match, pattern)) {
                     //std::cout << "Found in file: " << markdown_file << " (line " << line_number << "):\n" << line <<  std::endl;
                     for (size_t i = 0; i < match.size(); ++i) {
-                        auto new_obrs = new obsidian_result{};
-                        new_obrs->line_number = line_number;
-                        new_obrs->path = fs::path(markdown_file).string();
-                        new_obrs->hashtag = match[i];
-                        new_obrs->line = line;
+                        obsidian_result new_obrs =  obsidian_result{};
+                        new_obrs.line_number = line_number;
+                        new_obrs.path = fs::path(markdown_file).string();
+                        new_obrs.hashtag = match[i];
+                        new_obrs.line = line;
                         return_vector.push_back(new_obrs);
                     }
 
@@ -195,7 +195,7 @@ bool MultiVaultHandler::addFolderPath() {
     return false;
 }
 
-std::unordered_map<std::string, std::vector<obsidian_result *> > MultiVaultHandler::getResults() {
+std::unordered_map<std::string, std::vector<obsidian_result > > MultiVaultHandler::getResults() {
     return this->results_hash_map;
 }
 
@@ -254,10 +254,10 @@ std::vector<obsidian_result> MultiVaultHandler::searchForHashtags(const std::str
             return return_results;
         }
 
-        for (auto vector_iter: searchResult->second) {
-            obsidian_result res = obsidian_result{vector_iter->path, vector_iter->line_number, vector_iter->hashtag,
-                                                  vector_iter->line};
-            std::cout << "Found in file " << vector_iter->path << std::endl;
+        for (const auto& vector_iter: searchResult->second) {
+            obsidian_result res = obsidian_result{vector_iter.path, vector_iter.line_number, vector_iter.hashtag,
+                                                  vector_iter.line};
+            std::cout << "Found in file " << vector_iter.path << std::endl;
             return_results.push_back(res);
         }
         return return_results;
@@ -276,6 +276,5 @@ void MultiVaultHandler::deletePath(fs::path inputPath) {
 
    obsidian_vaults_path.erase(iterator);
 
-    // this will leak memeory! TODO Fix this
     results_hash_map = {};
 }

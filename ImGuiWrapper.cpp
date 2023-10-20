@@ -82,8 +82,8 @@ void render_dear_imgui_with_obsidian(MultiVaultHandler *obsidian_handle) {
     for (const auto &result: obsidian_handle->getResults()) {
         auto multiple_results = result.second;
         for (const auto &single_entry: multiple_results) {
-            ImGui::Text(single_entry->hashtag.c_str());
-            ImGui::Text(single_entry->path.c_str());
+            ImGui::Text(single_entry.hashtag.c_str());
+            ImGui::Text(single_entry.path.c_str());
         }
 
     }
