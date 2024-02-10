@@ -13,10 +13,10 @@ std::regex regex_pattern_to_test("#[\\w]+"); // everything beginning with a hash
 
 
 
-void findMarkdownFiles(const fs::path& directory_path, std::vector<fs::path>& markdown_files) {
+void findMarkdownFiles(const fs::path &directory_path, std::vector<fs::path> &markdown_files) {
     try {
         // Iterate over the directory
-        for (const auto& entry : fs::directory_iterator(directory_path)) {
+        for (const auto &entry: fs::directory_iterator(directory_path)) {
             if (fs::is_directory(entry)) {
                 // If the entry is a subdirectory, recursively search it
                 findMarkdownFiles(entry, markdown_files);
@@ -25,13 +25,13 @@ void findMarkdownFiles(const fs::path& directory_path, std::vector<fs::path>& ma
                 markdown_files.push_back(entry.path());
             }
         }
-    } catch (const fs::filesystem_error& ex) {
+    } catch (const fs::filesystem_error &ex) {
         std::cerr << "Error: " << ex.what() << std::endl;
     }
 }
 
 // Function to search for lines containing "#Sometext" in a Markdown file
-void searchForTextInMarkdown(const fs::path& markdown_file) {
+void searchForTextInMarkdown(const fs::path &markdown_file) {
     try {
         std::ifstream file(markdown_file);
         if (file.is_open()) {
@@ -46,7 +46,8 @@ void searchForTextInMarkdown(const fs::path& markdown_file) {
                 std::smatch match;
                 // Check if the line contains the search text
                 if (std::regex_search(line, match, pattern)) {
-                    std::cout << "Found in file: " << markdown_file << " (line " << line_number << "):\n" << line << std::endl;
+                    std::cout << "Found in file: " << markdown_file << " (line " << line_number << "):\n" << line
+                              << std::endl;
                 }
             }
 
@@ -54,7 +55,7 @@ void searchForTextInMarkdown(const fs::path& markdown_file) {
         } else {
             std::cerr << "Unable to open file: " << markdown_file << std::endl;
         }
-    } catch (const std::exception& ex) {
+    } catch (const std::exception &ex) {
         std::cerr << "Error: " << ex.what() << std::endl;
     }
 }
@@ -66,7 +67,6 @@ int not_main() {
     setvbuf(stdout, nullptr, _IOFBF, 1000);
 
 
-
     std::vector<fs::path> markdown_files;
 
     try {
@@ -76,17 +76,15 @@ int not_main() {
             findMarkdownFiles(directory_path_to_test, markdown_files);
 
             // Search for the specified text in each Markdown file
-            for (const auto& markdown_file : markdown_files) {
+            for (const auto &markdown_file: markdown_files) {
                 searchForTextInMarkdown(markdown_file);
             }
         } else {
             std::cerr << "Provided path is not a directory." << std::endl;
         }
-    } catch (const fs::filesystem_error& ex) {
+    } catch (const fs::filesystem_error &ex) {
         std::cerr << "Error: " << ex.what() << std::endl;
     }
-
-
 
 
     return 0;
